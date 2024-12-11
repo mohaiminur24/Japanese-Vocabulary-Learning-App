@@ -6,6 +6,7 @@ export default function LessonsScreen() {
   const handleRedirect = (id) => {
     navigation("vocabulary");
   };
+  
   return (
     <div>
       <SectionWrapper>

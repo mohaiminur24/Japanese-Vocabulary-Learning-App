@@ -3,12 +3,17 @@ import { createContext, useState } from "react";
 export const AuthContext = createContext();
 
 export default function AuthenticatorContext({ children }) {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  // const admin = 1;
+  // const user = 2;
+
   const ContextValue = {
-    isAdmin,
+    userRole,
     loading,
+    setUserRole,
+    setLoading
   };
 
   return (

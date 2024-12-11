@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { NavLink, useNavigate } from "react-router-dom";
+import { AuthContext } from "../components/auth-layout/auth-context";
 
 const LoginScreen = () => {
-    const navigate = useNavigate();
+  const {userRole} =useContext(AuthContext)
+  const navigate = useNavigate();
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -18,7 +20,7 @@ const LoginScreen = () => {
     }),
     onSubmit: (values) => {
       console.log("Form Submitted", values);
-      navigate("/lessons")
+      userRole === 1 ? navigate("lessons/dashboard"):navigate("/lessons");
     },
   });
 

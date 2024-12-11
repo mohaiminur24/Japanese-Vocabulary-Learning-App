@@ -1,25 +1,68 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import SectionWrapper from "../components/common/section-wrapper";
+import { AuthContext } from "../components/auth-layout/auth-context";
+import Modal from "../components/common/modal";
 
 export default function VocabularyScreen() {
+  const { userRole } = useContext(AuthContext);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleNext = () => {
+    if (currentIndex < data.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const currentWord = data[currentIndex];
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = data.slice(startIndex, startIndex + itemsPerPage);
 
+  const [isOpenSlide, setOpenSlide] = useState(false);
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };
+
+  const handleSpeak = (letter) => {
+    const utterance = new SpeechSynthesisUtterance(letter);
+    utterance.lang = "ja-JP"; // Japanese
+    window.speechSynthesis.speak(utterance);
   };
 
   return (
     <div>
       <SectionWrapper>
-        <div className="bg-gray-100 min-h-screen p-6">
-          <h1 className="text-3xl font-bold text-center mb-6">
-            Japanese Vocabulary
-          </h1>
+        
+          <div className="flex justify-end space-x-4">
+            {/*slide modal*/}
+            <button
+              className="btn btn-info btn-outline"
+              onClick={() => setOpenSlide(true)}
+            >
+              Open Slider
+            </button>
+            {/* Add Vocabulary Section */}
+            {userRole === 1 && <button
+              className="btn btn-success btn-outline"
+              onClick={() => navigation("/lessons/dashboard")}
+            >
+              Add Vocabulary
+            </button>}
+            
+          </div>
+        
+
+        <div className="p-6">
           <div className="overflow-x-auto">
             <table className="table">
               <thead>
@@ -35,13 +78,32 @@ export default function VocabularyScreen() {
               <tbody>
                 {currentItems.map((x) => {
                   return (
-                    <tr className="font-extralight text-gray-500">
+                    <tr className="font-extralight text-gray-500" key={x.id}>
                       <th>{x.id}</th>
                       <td>{x.word}</td>
                       <td>{x.meaning}</td>
                       <td>{x.pronunciation}</td>
                       <td className="text-xs">{x.whenToSay}</td>
                       <td>{x.lessonNo}</td>
+                      {userRole === 1 && (
+                        <td className="flex justify-center items-center space-x-2">
+                          {/* Edit Button */}
+                          <button
+                            className="btn btn-sm btn-accent"
+                            onClick={() => {}}
+                          >
+                            Edit
+                          </button>
+
+                          {/* Delete Button */}
+                          <button
+                            className="btn btn-sm btn-warning"
+                            onClick={() => {}}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -67,6 +129,69 @@ export default function VocabularyScreen() {
           </div>
         </div>
       </SectionWrapper>
+      {/* modal is here */}
+      <Modal
+        isOpen={isOpenSlide}
+        title="Learning Japanese Vocabulary"
+        onClose={() => setOpenSlide(false)}
+      >
+        <div>
+          <div className="p-6 flex flex-col items-center ">
+            <div className="rounded-lg w-full max-w-md p-6 border-b">
+              <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">
+                {currentWord.word}
+              </h2>
+              <div className="text-gray-700 space-y-4">
+                <p>
+                  <span className="font-semibold">Meaning:</span>{" "}
+                  {currentWord.meaning}
+                </p>
+                <p>
+                  <span className="font-semibold">Pronunciation:</span>{" "}
+                  {currentWord.pronunciation}
+                </p>
+                <p>
+                  <span className="font-semibold">When to Say:</span>{" "}
+                  {currentWord.whenToSay}
+                </p>
+                <p>
+                  <span className="font-semibold">Lesson Number:</span>{" "}
+                  {currentWord.lessonNo}
+                </p>
+              </div>
+              <button
+                onClick={() => handleSpeak(currentWord.word)}
+                className="btn btn-success btn-outline mt-20"
+              >
+                {currentWord.meaning}
+              </button>
+            </div>
+
+            <div className="flex space-x-4 mt-6">
+              <button
+                className={`btn ${
+                  currentIndex === 0 ? "btn-disabled" : "btn-primary"
+                }`}
+                onClick={handlePrevious}
+                disabled={currentIndex === 0}
+              >
+                Previous
+              </button>
+              <button
+                className={`btn ${
+                  currentIndex === data.length - 1
+                    ? "btn-disabled"
+                    : "btn-primary"
+                }`}
+                onClick={handleNext}
+                disabled={currentIndex === data.length - 1}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

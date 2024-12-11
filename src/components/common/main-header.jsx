@@ -2,14 +2,15 @@ import { useContext } from "react";
 import { AuthContext } from "../auth-layout/auth-context";
 
 export default function MainHeader() {
-  const {isAdmin, loading} = useContext(AuthContext);
+  const { userRole } = useContext(AuthContext);
+
   const userHeader = (
     <>
       <li>
         <a href="/lessons">Lessons</a>
       </li>
       <li>
-        <a href="/lessons/vocabulary">Tutorials</a>
+        <a href="/lessons/tutorial">Tutorials</a>
       </li>
     </>
   );
@@ -17,10 +18,13 @@ export default function MainHeader() {
   const adminHeader = (
     <>
       <li>
-        <a href="/user_management">User Management</a>
+        <a href="dashboard">Dashboard</a>
       </li>
       <li>
-        <a href="/content_management">Content Management</a>
+        <a href="user-management">User Management</a>
+      </li>
+      <li>
+        <a href="content-management">Content Management</a>
       </li>
       <li>
         <a href="/tutorial_management">Tutorial Management</a>
@@ -29,7 +33,7 @@ export default function MainHeader() {
   );
 
   return (
-    <div className="px-5 md:px-10 lg:px-20 border-b-2">
+    <div className="px-5 md:px-10 lg:px-20 border-b-2 bg-white">
       <div className="navbar bg-white">
         <div className="navbar-start">
           <div className="dropdown">
@@ -53,10 +57,13 @@ export default function MainHeader() {
               tabIndex={0}
               className="menu menu-sm tracking-tighter dropdown-content bg-white rounded-box z-[1] mt-3 w-52 p-2 shadow text-black"
             >
-              {isAdmin ?adminHeader:userHeader}
+              {userRole == 1 ? adminHeader : userHeader}
             </ul>
           </div>
-          <a className="bg-white" href="/lessons">
+          <a
+            className="bg-white"
+            href={userRole == 2 ? "/lessons" : "/lessons/dashboard"}
+          >
             <img
               className="w-36 h-10"
               src="https://www.japanesevocabularyshortcut.com/wp-content/uploads/2020/04/cropped-jvs-rectangle.png"
@@ -64,7 +71,17 @@ export default function MainHeader() {
           </a>
         </div>
         <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal tracking-tighter px-2 text-black">{isAdmin ?adminHeader:userHeader}</ul>
+          <ul className="menu menu-horizontal tracking-tighter px-2 text-black">
+            {userRole == 1 ? adminHeader : userHeader}
+          </ul>
+        </div>
+        <div className="navbar-end">
+          <a
+            href="/"
+            className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
+          >
+            login
+          </a>
         </div>
       </div>
     </div>
