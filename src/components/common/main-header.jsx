@@ -9,13 +9,7 @@ export default function MainHeader() {
         <a href="/lessons">Lessons</a>
       </li>
       <li>
-        <a href="/tutorials">Tutorials</a>
-      </li>
-      <li>
-        <a href="/">Login</a>
-      </li>
-      <li>
-        <a href="/register">Register</a>
+        <a href="/lessons/vocabulary">Tutorials</a>
       </li>
     </>
   );
@@ -35,7 +29,7 @@ export default function MainHeader() {
   );
 
   return (
-    <div className="px-5 md:px-10 lg:px-20">
+    <div className="px-5 md:px-10 lg:px-20 border-b-2">
       <div className="navbar bg-white">
         <div className="navbar-start">
           <div className="dropdown">
