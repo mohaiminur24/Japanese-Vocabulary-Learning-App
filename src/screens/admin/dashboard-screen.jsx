@@ -1,6 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import SectionWrapper from "../../components/common/section-wrapper";
 
 export default function DashboardScreen() {
+  const navigate = useNavigate();
   return (
     <div>
       <SectionWrapper>
@@ -38,41 +40,41 @@ const dashboardCards = [
     title: "Lessons",
     description:
       "Access a comprehensive list of lessons available in the system. You can view, organize, and update each lesson with ease.",
-    path: "/lessons",
+    path: "/lessons/content-management",
   },
   {
     id: 2,
     title: "Add Lessons",
     description:
       "Create new lessons for your system by providing all necessary details, including title, description, and associated vocabulary.",
-    path: "/add-lessons",
+    path: "/lessons/content-management",
   },
   {
     id: 3,
     title: "Add Vocabularies",
     description:
       "Easily add new vocabulary items to any existing lesson. Specify words, their meanings, pronunciations, and when to use them.",
-    path: "/add-vocabularies",
+    path: "/lessons/vocabulary",
   },
   {
     id: 4,
     title: "Manage Users",
     description:
       "Handle all user-related tasks, such as assigning roles, promoting or demoting users, and managing their access to resources.",
-    path: "/manage-users",
+    path: "/lessons/user-management",
   },
   {
     id: 5,
     title: "Lesson Management",
     description:
       "Take control of lessons with this dedicated page. Oversee their structure, manage content, and ensure everything is up-to-date.",
-    path: "/lesson-management",
+    path: "/lessons/content-management",
   },
   {
     id: 6,
     title: "Vocabulary Management",
     description:
       "Efficiently manage vocabulary sets for every lesson. Update words, modify details, and keep your lessons enriched with valuable vocabulary.",
-    path: "/vocabulary-management",
+    path: "/lessons/vocabulary",
   },
 ];

@@ -27,7 +27,7 @@ export default function MainHeader() {
         <a href="content-management">Content Management</a>
       </li>
       <li>
-        <a href="/tutorial_management">Tutorial Management</a>
+        <a href="/lessons/tutorial">Tutorial Management</a>
       </li>
     </>
   );

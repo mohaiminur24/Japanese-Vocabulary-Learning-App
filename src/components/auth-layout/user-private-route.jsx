@@ -5,9 +5,16 @@ import { useNavigate } from "react-router-dom";
 export default function UserPrivateRoute({ children }) {
   const { userRole } = useContext(AuthContext);
   const navigate = useNavigate();
+
   if (userRole === 2 || userRole == 1) {
     return children;
   } else {
     navigate("/");
   }
+
+  useEffect(() => {
+    if (userRole === null) {
+      return navigate("/");
+    }
+  });
 }

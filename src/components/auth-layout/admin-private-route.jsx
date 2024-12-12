@@ -10,4 +10,10 @@ export default function AdminPrivateRoute({ children }) {
   } else {
     navigate("/");
   }
+
+  useEffect(() => {
+    if (userRole === null) {
+      return navigate("/");
+    }
+  });
 }

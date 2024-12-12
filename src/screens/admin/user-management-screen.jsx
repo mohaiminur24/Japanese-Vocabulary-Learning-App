@@ -73,14 +73,13 @@ export default function UserManagementScreen() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     {x.role == 1 ? (
-                      <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
-                        User
-                      </button>
+                      <button className="btn btn-primary w-20">User</button>
                     ) : (
-                      <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
-                        Admin
-                      </button>
+                      <button className="btn btn-primary w-20">Admin</button>
                     )}
+                    <button className="btn btn-error btn-outline ml-3">
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}

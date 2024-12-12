@@ -23,7 +23,11 @@ const route = createBrowserRouter([
   },
   {
     path: "/lessons",
-    element: <MainScreen />,
+    element: (
+      <UserPrivateRoute>
+        <MainScreen />
+      </UserPrivateRoute>
+    ),
     children: [
       {
         path: "/lessons",
@@ -45,7 +49,7 @@ const route = createBrowserRouter([
         path: "dashboard",
         element: (
           <AdminPrivateRoute>
-            <DashboardScreen/>
+            <DashboardScreen />
           </AdminPrivateRoute>
         ),
       },
@@ -53,7 +57,7 @@ const route = createBrowserRouter([
         path: "content-management",
         element: (
           <AdminPrivateRoute>
-            <ContentManagementScreen/>
+            <ContentManagementScreen />
           </AdminPrivateRoute>
         ),
       },
@@ -61,7 +65,7 @@ const route = createBrowserRouter([
         path: "user-management",
         element: (
           <AdminPrivateRoute>
-            <UserManagementScreen/>
+            <UserManagementScreen />
           </AdminPrivateRoute>
         ),
       },
@@ -69,7 +73,7 @@ const route = createBrowserRouter([
         path: "tutorial",
         element: (
           <UserPrivateRoute>
-            <TutorialScreen/>
+            <TutorialScreen />
           </UserPrivateRoute>
         ),
       },
