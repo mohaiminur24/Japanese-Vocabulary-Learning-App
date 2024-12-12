@@ -3,10 +3,14 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { NavLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/auth-layout/auth-context";
+import { useCreateNewUser, useLoginUser } from "../react-query/auth";
+import Swal from "sweetalert2";
 
 const LoginScreen = () => {
-  const {userRole} =useContext(AuthContext)
+  const { setUserRole, setUser } = useContext(AuthContext);
+  const login_user = useLoginUser();
   const navigate = useNavigate();
+
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -18,9 +22,23 @@ const LoginScreen = () => {
         .required("Email is required"),
       password: Yup.string().required("Password is required"),
     }),
-    onSubmit: (values) => {
-      console.log("Form Submitted", values);
-      userRole === 1 ? navigate("lessons/dashboard"):navigate("/lessons");
+    onSubmit: async (values) => {
+      const res = await login_user.mutateAsync(values);
+      if (res.success) {
+        localStorage.setItem("access-token", res.token);
+        localStorage.setItem("user", JSON.stringify(res));
+        setUserRole(res.role);
+        setUser(res);
+        navigate(res.role === 1 ? "lessons/dashboard" : "/lessons");
+      } else {
+        Swal.fire({
+          position: "top-end",
+          icon: "error",
+          title: "wrong credential",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      }
     },
   });
 

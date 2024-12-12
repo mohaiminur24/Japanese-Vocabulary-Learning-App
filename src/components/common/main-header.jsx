@@ -1,8 +1,9 @@
-import { useContext } from "react";
-import { AuthContext } from "../auth-layout/auth-context";
+import { useNavigate } from "react-router-dom";
+import { logout, user_info } from "./custom-hook";
 
 export default function MainHeader() {
-  const { userRole } = useContext(AuthContext);
+  const user = user_info();
+  const navigation = useNavigate();
 
   const userHeader = (
     <>
@@ -32,6 +33,8 @@ export default function MainHeader() {
     </>
   );
 
+  if (!user) return logout_user();
+
   return (
     <div className="px-5 md:px-10 lg:px-20 border-b-2 bg-white">
       <div className="navbar bg-white">
@@ -57,12 +60,12 @@ export default function MainHeader() {
               tabIndex={0}
               className="menu menu-sm tracking-tighter dropdown-content bg-white rounded-box z-[1] mt-3 w-52 p-2 shadow text-black"
             >
-              {userRole == 1 ? adminHeader : userHeader}
+              {user.role == 1 ? adminHeader : userHeader}
             </ul>
           </div>
           <a
             className="bg-white"
-            href={userRole == 2 ? "/lessons" : "/lessons/dashboard"}
+            href={user.role == 2 ? "/lessons" : "/lessons/dashboard"}
           >
             <img
               className="w-36 h-10"
@@ -72,16 +75,19 @@ export default function MainHeader() {
         </div>
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal tracking-tighter px-2 text-black">
-            {userRole == 1 ? adminHeader : userHeader}
+            {user.role == 1 ? adminHeader : userHeader}
           </ul>
         </div>
         <div className="navbar-end">
-          <a
-            href="/"
+          <button
+            onClick={() => {
+              logout();
+              navigation("/");
+            }}
             className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
           >
-            login
-          </a>
+            Logout
+          </button>
         </div>
       </div>
     </div>

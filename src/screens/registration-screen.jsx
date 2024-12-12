@@ -1,9 +1,13 @@
 import React from "react";
 import { useFormik } from "formik";
-import { Link, NavLink } from "react-router-dom";
+import { Navigate, NavLink, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
+import { useCreateNewUser } from "../react-query/auth";
+import Swal from "sweetalert2";
 
 const RegistrationScreen = () => {
+  const create_user = useCreateNewUser();
+  const navigation = useNavigate();
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -29,9 +33,19 @@ const RegistrationScreen = () => {
         .min(6, "Password must be at least 6 characters")
         .required("Password is required"),
     }),
-    onSubmit: (values) => {
-      console.log("Form submitted with values:", values);
-      // Handle registration logic
+    onSubmit: async (values) => {
+      values.photo = "";
+      const res = await create_user.mutateAsync(values);
+      if (res.acknowledged) {
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Account created successfully!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+       return navigation("/");
+      }
     },
   });
 
@@ -153,9 +167,32 @@ const RegistrationScreen = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full px-4 py-2 mt-6 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-200"
+            className="w-full px-4 py-2 mt-6 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-200 flex items-center justify-center"
+            disabled={create_user.isLoading}
           >
-            Register
+            {create_user.isLoading ? (
+              <svg
+                className="w-5 h-5 mr-2 text-white animate-spin"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8z"
+                ></path>
+              </svg>
+            ) : null}
+            {create_user.isLoading ? "Loading..." : "Register"}
           </button>
         </form>
 

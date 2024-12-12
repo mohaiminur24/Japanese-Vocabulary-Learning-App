@@ -4,6 +4,8 @@ import { AuthContext } from "../components/auth-layout/auth-context";
 import Modal from "../components/common/modal";
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import { useGetProfile } from "../react-query/auth";
+import Loading from "../components/common/loading";
 
 const videoData = [
   {
@@ -59,14 +61,16 @@ const validationSchema = Yup.object({
 });
 
 const TutorialScreen = () => {
-  const { userRole } = useContext(AuthContext);
   const [isOpen, setOpen] = useState(false);
+  const profile = useGetProfile();
 
   const initialValues = {
     title: "",
     description: "",
     youtubeLink: "",
   };
+
+  if (profile.isLoading) return <Loading />;
 
   // Form submission handler
   const handleSubmit = (values) => {
@@ -77,7 +81,7 @@ const TutorialScreen = () => {
     <div>
       <SectionWrapper>
         <div className="flex justify-end space-x-4">
-          {userRole === 1 && (
+          {profile.data.role === 1 && (
             <button
               className="btn btn-success btn-outline"
               onClick={() => setOpen(true)}

@@ -1,10 +1,12 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import SectionWrapper from "../components/common/section-wrapper";
-import { AuthContext } from "../components/auth-layout/auth-context";
 import Modal from "../components/common/modal";
+import { logout, user_info } from "../components/common/custom-hook";
+import { useNavigate } from "react-router-dom";
 
 export default function VocabularyScreen() {
-  const { userRole } = useContext(AuthContext);
+  const user = user_info();
+  const navigation = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,6 +41,11 @@ export default function VocabularyScreen() {
     window.speechSynthesis.speak(utterance);
   };
 
+  if(!user) {
+    logout();
+    navigation("/")
+  }
+
   return (
     <div>
       <SectionWrapper>
@@ -52,7 +59,7 @@ export default function VocabularyScreen() {
               Open Slider
             </button>
             {/* Add Vocabulary Section */}
-            {userRole === 1 && <button
+            {user.role === 1 && <button
               className="btn btn-success btn-outline"
               onClick={() => navigation("/lessons/dashboard")}
             >
@@ -85,7 +92,7 @@ export default function VocabularyScreen() {
                       <td>{x.pronunciation}</td>
                       <td className="text-xs">{x.whenToSay}</td>
                       <td>{x.lessonNo}</td>
-                      {userRole === 1 && (
+                      {user.role === 1 && (
                         <td className="flex justify-center items-center space-x-2">
                           {/* Edit Button */}
                           <button
