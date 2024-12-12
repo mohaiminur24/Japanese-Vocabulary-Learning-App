@@ -11,6 +11,7 @@ import DashboardScreen from "../../screens/admin/dashboard-screen";
 import ContentManagementScreen from "../../screens/admin/content-management-screen";
 import UserManagementScreen from "../../screens/admin/user-management-screen";
 import TutorialScreen from "../../screens/tutorial-screen";
+import AddVocabularyScreen from "../../screens/admin/add-vocubulary-screen";
 
 const route = createBrowserRouter([
   {
@@ -75,6 +76,14 @@ const route = createBrowserRouter([
           <UserPrivateRoute>
             <TutorialScreen />
           </UserPrivateRoute>
+        ),
+      },
+      {
+        path: "add-vocabulary",
+        element: (
+          <AdminPrivateRoute>
+            <AddVocabularyScreen />
+          </AdminPrivateRoute>
         ),
       },
     ],

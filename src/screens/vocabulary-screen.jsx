@@ -41,34 +41,32 @@ export default function VocabularyScreen() {
     window.speechSynthesis.speak(utterance);
   };
 
-  if(!user) {
+  if (!user) {
     logout();
-    navigation("/")
+    navigation("/");
   }
 
   return (
     <div>
       <SectionWrapper>
-        
-          <div className="flex justify-end space-x-4">
-            {/*slide modal*/}
+        <div className="flex justify-end space-x-4">
+          {/*slide modal*/}
+          <button
+            className="btn btn-info btn-outline"
+            onClick={() => setOpenSlide(true)}
+          >
+            Open Slider
+          </button>
+          {/* Add Vocabulary Section */}
+          {user.role === 1 && (
             <button
-              className="btn btn-info btn-outline"
-              onClick={() => setOpenSlide(true)}
-            >
-              Open Slider
-            </button>
-            {/* Add Vocabulary Section */}
-            {user.role === 1 && <button
               className="btn btn-success btn-outline"
-              onClick={() => navigation("/lessons/dashboard")}
+              onClick={() => navigation("/lessons/add-vocabulary")}
             >
               Add Vocabulary
-            </button>}
-            
-          </div>
-        
-
+            </button>
+          )}
+        </div>
         <div className="p-6">
           <div className="overflow-x-auto">
             <table className="table">

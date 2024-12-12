@@ -1,11 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import SectionWrapper from "../components/common/section-wrapper";
 
+
 export default function LessonsScreen() {
   const navigation = useNavigate();
   const handleRedirect = (id) => {
     navigation("vocabulary");
   };
+
+  
   
   return (
     <div>

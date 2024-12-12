@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import SectionWrapper from "../../components/common/section-wrapper";
 import { useNavigate } from "react-router-dom";
+import Modal from "../../components/common/modal";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { useCreateLesson, useGetLessons } from "../../react-query/lessons";
+import Swal from "sweetalert2";
 
 export default function ContentManagementScreen() {
   const navigation = useNavigate();
@@ -15,6 +20,51 @@ export default function ContentManagementScreen() {
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
+  const [isOpen, setIsOpen] = useState(false);
+  const createLessons = useCreateLesson();
+  const lessons = useGetLessons();
+
+  const formik = useFormik({
+    initialValues: {
+      title: "",
+      description: "",
+    },
+    validationSchema: Yup.object({
+      title: Yup.string()
+        .required("Title is required")
+        .min(3, "Title must be at least 3 characters"),
+      description: Yup.string()
+        .required("Description is required")
+        .min(10, "Description must be at least 10 characters"),
+    }),
+    onSubmit: async (values, { resetForm }) => {
+      const res = await createLessons.mutateAsync(values);
+      if(res.success){
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Your lessons has been saved",
+          showConfirmButton: false,
+          timer: 1500
+        });
+      }else{
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "something went wrong!",
+          showConfirmButton: false,
+          timer: 1500
+        });
+      }
+      
+      setIsOpen(false);
+      resetForm();
+    },
+  });
+
+
+  console.log(lessons);
+  
 
   return (
     <div>
@@ -22,17 +72,14 @@ export default function ContentManagementScreen() {
         <div className="p-6 space-y-6">
           <div className="flex justify-end space-x-4">
             {/* Add Lesson Section */}
-            <button
-              className="btn btn-primary"
-              onClick={() => navigation("/lessons/dashboard")}
-            >
+            <button className="btn btn-primary" onClick={() => setIsOpen(true)}>
               Add Lesson
             </button>
 
             {/* Add Vocabulary Section */}
             <button
               className="btn btn-success"
-              onClick={() => navigation("/lessons/dashboard")}
+              onClick={() => navigation("/lessons/add-vocabulary")}
             >
               Add Vocabulary
             </button>
@@ -118,6 +165,81 @@ export default function ContentManagementScreen() {
           </div>
         </div>
       </SectionWrapper>
+      <Modal
+        title={"Create New Lession"}
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+      >
+        <form onSubmit={formik.handleSubmit} className="p-6">
+          {/* Title Field */}
+          <div className="mb-4">
+            <label
+              htmlFor="title"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={formik.values.title}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={`w-full px-4 py-2 border rounded-md bg-transparent text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                formik.touched.title && formik.errors.title
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+            />
+            {formik.touched.title && formik.errors.title && (
+              <p className="text-red-500 text-sm mt-1">{formik.errors.title}</p>
+            )}
+          </div>
+          {/* Description Field */}
+          <div className="mb-4">
+            <label
+              htmlFor="description"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={`w-full px-4 py-2 border rounded-md bg-transparent text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                formik.touched.description && formik.errors.description
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+            ></textarea>
+            {formik.touched.description && formik.errors.description && (
+              <p className="text-red-500 text-sm mt-1">
+                {formik.errors.description}
+              </p>
+            )}
+          </div>
+          {/* Submit Button */}
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="mr-4 bg-gray-300 text-gray-800 py-2 px-4 rounded-md font-semibold hover:bg-gray-400 focus:outline-none"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
+            >
+              Create
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
