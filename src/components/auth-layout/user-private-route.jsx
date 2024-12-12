@@ -1,20 +1,20 @@
-import { useContext, useEffect } from "react";
-import { AuthContext } from "./auth-context";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { logout, user_info } from "../common/custom-hook";
 
 export default function UserPrivateRoute({ children }) {
-  const { userRole } = useContext(AuthContext);
+  const user = user_info();
   const navigate = useNavigate();
 
-  if (userRole === 2 || userRole == 1) {
-    return children;
-  } else {
-    navigate("/");
-  }
-
   useEffect(() => {
-    if (userRole === null) {
-      return navigate("/");
-    }
-  });
+    if (!user) {
+      logout();
+      navigate("/");
+    };
+  }, [user, navigate]);
+
+  if (user && (user.role === 1 || user.role === 2)) {
+    return children;
+  }
+  return null;
 }

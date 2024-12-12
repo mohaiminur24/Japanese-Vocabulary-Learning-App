@@ -1,49 +1,12 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import SectionWrapper from "../components/common/section-wrapper";
-import { AuthContext } from "../components/auth-layout/auth-context";
 import Modal from "../components/common/modal";
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useGetProfile } from "../react-query/auth";
 import Loading from "../components/common/loading";
-
-const videoData = [
-  {
-    id: 1,
-    title: "60 Japanese Words for Everyday Life - Basic Vocabulary #3",
-    description:
-      "his series, we will teach you the core 800 Japanese words that you must know if you're a an absolute beginnerWith each new episodes in this series, we’ll include the previous lessons at the end.",
-    embedLink: "https://www.youtube.com/embed/FCtHKQk2Dc0",
-  },
-  {
-    id: 2,
-    title: "80 Japanese Words for Everyday Life - Basic Vocabulary #4",
-    description:
-      "In this series, we will teach you the core 800 Japanese words that you must know if you're a an absolute beginnerWith each new episodes in this series, we’ll include the previous lessons at the end.",
-    embedLink: "https://www.youtube.com/embed/EK4YZPd7XE8",
-  },
-  {
-    id: 3,
-    title:
-      "Body Parts in Japanese | からだのパーツ】face/かお, body/からだ, mouth/くち, hand/てvocabulary",
-    description:
-      "You will learn different parts of the body with body parts pictures , English and Japanese. I read each words twice. The first time is normal and second is slower. ",
-    embedLink: "https://www.youtube.com/embed/j6YuhK6T5f4",
-  },
-  {
-    id: 4,
-    title: "Japanese Vocabulary & Phrases | 40 Things You See Outside",
-    description:
-      "Whenever I want perfect enunciation and fairly easy to digest sentences, I come here !!! Plus Tanaka's radio voice is sooo soothing for my soul ",
-    embedLink: "https://www.youtube.com/embed/YxHMFaz2_6w",
-  },
-  {
-    id: 5,
-    title: "100 Informal Japanese Phrases for Beginner",
-    description: "100 Informal Japanese Phrases for Beginner",
-    embedLink: "https://www.youtube.com/embed/ogqeb9TLO8A",
-  },
-];
+import { useCreateTutorial, useGetTutorial } from "../react-query/tutorial";
+import Swal from "sweetalert2";
 
 const validationSchema = Yup.object({
   title: Yup.string()
@@ -61,20 +24,41 @@ const validationSchema = Yup.object({
 });
 
 const TutorialScreen = () => {
+  const tutorialData = useGetTutorial();
   const [isOpen, setOpen] = useState(false);
   const profile = useGetProfile();
+  const tutorial = useCreateTutorial();
 
   const initialValues = {
     title: "",
     description: "",
     youtubeLink: "",
   };
+  
 
-  if (profile.isLoading) return <Loading />;
+  if (profile.isLoading || tutorialData.isLoading) return <Loading />;
 
   // Form submission handler
-  const handleSubmit = (values) => {
-    console.log("Form Data: ", values);
+  const handleSubmit = async(values) => {
+    const res = await tutorial.mutateAsync(values);
+    if(res.success){
+      Swal.fire({
+        position: "top-end",
+        icon: "success",
+        title: res.message,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }else{
+      Swal.fire({
+        position: "top-end",
+        icon: "error",
+        title: res.message,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
+    setOpen(false)
   };
 
   return (
@@ -91,7 +75,7 @@ const TutorialScreen = () => {
           )}
         </div>
         <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 px-6 py-8 bg-gray-50">
-          {videoData.map((video) => (
+          {tutorialData.data.map((video) => (
             <div
               key={video.id}
               className="bg-white shadow-md hover:shadow-lg rounded-xl transition-shadow duration-300 overflow-hidden border border-gray-200"

@@ -36,7 +36,7 @@ const RegistrationScreen = () => {
     onSubmit: async (values) => {
       values.photo = "";
       const res = await create_user.mutateAsync(values);
-      if (res.acknowledged) {
+      if (res.success) {
         Swal.fire({
           position: "top-end",
           icon: "success",
@@ -45,6 +45,14 @@ const RegistrationScreen = () => {
           timer: 1500,
         });
        return navigation("/");
+      }else{
+        Swal.fire({
+          position: "top-end",
+          icon: "error",
+          title: res.message,
+          showConfirmButton: false,
+          timer: 1500,
+        });
       }
     },
   });

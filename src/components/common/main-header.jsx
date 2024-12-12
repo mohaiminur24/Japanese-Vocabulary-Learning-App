@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { logout, user_info } from "./custom-hook";
+import { useEffect } from "react";
 
 export default function MainHeader() {
   const user = user_info();
@@ -33,7 +34,16 @@ export default function MainHeader() {
     </>
   );
 
-  if (!user) return logout_user();
+  const handleUser = () => {
+    if (!user) {
+      logout();
+      return navigation("/");
+    }
+  };
+
+  useEffect(() => {
+    handleUser();
+  }, []);
 
   return (
     <div className="px-5 md:px-10 lg:px-20 border-b-2 bg-white">

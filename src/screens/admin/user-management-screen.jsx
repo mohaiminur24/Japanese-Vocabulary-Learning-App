@@ -1,6 +1,28 @@
+import Loading from "../../components/common/loading";
 import SectionWrapper from "../../components/common/section-wrapper";
+import {
+  useDeleteUser,
+  useGetUsers,
+  useUpdateUser,
+} from "../../react-query/auth";
 
 export default function UserManagementScreen() {
+  const users = useGetUsers();
+  const update = useUpdateUser();
+  const deleteUser = useDeleteUser();
+
+  if (users.isLoading) return <Loading />;
+
+  const handleUpdateUser = async (id, role) => {
+    const res = await update.mutateAsync({ id: id, role: role });
+    console.log(res);
+    
+  };
+
+  const handleDelete = async (id) => {
+    await deleteUser.mutateAsync(id);
+  };
+
   return (
     <div>
       <SectionWrapper>
@@ -35,7 +57,7 @@ export default function UserManagementScreen() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {userList.map((x, index) => (
+              {users.data.map((x, index) => (
                 <tr
                   key={x.id}
                   className={`hover:bg-gray-50 ${
@@ -73,12 +95,40 @@ export default function UserManagementScreen() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     {x.role == 1 ? (
-                      <button className="btn btn-primary w-20">User</button>
+                      <button
+                        onClick={() => handleUpdateUser(x._id, 2)}
+                        className="btn btn-primary w-20"
+                        disabled={update.isLoading}
+                      >
+                        {update.isLoading ? (
+                          <span className="loader"></span>
+                        ) : (
+                          "User"
+                        )}
+                      </button>
                     ) : (
-                      <button className="btn btn-primary w-20">Admin</button>
+                      <button
+                        onClick={() => handleUpdateUser(x._id, 1)}
+                        className="btn btn-primary w-20"
+                        disabled={update.isLoading}
+                      >
+                        {update.isLoading ? (
+                          <span className="loader"></span>
+                        ) : (
+                          "Admin"
+                        )}
+                      </button>
                     )}
-                    <button className="btn btn-error btn-outline ml-3">
-                      Delete
+                    <button
+                      onClick={() => handleDelete(x._id)}
+                      className="btn btn-error btn-outline ml-3"
+                      disabled={deleteUser.isLoading}
+                    >
+                      {deleteUser.isLoading ? (
+                        <span className="loader"></span>
+                      ) : (
+                        "Delete"
+                      )}
                     </button>
                   </td>
                 </tr>
