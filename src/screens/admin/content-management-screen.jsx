@@ -4,7 +4,12 @@ import { useNavigate } from "react-router-dom";
 import Modal from "../../components/common/modal";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useCreateLesson, useGetLessons } from "../../react-query/lessons";
+import {
+  useCreateLesson,
+  useDeleteLesson,
+  useGetLessons,
+  useUpdateLesson,
+} from "../../react-query/lessons";
 import Swal from "sweetalert2";
 import Loading from "../../components/common/loading";
 
@@ -13,17 +18,14 @@ export default function ContentManagementScreen() {
   const lessons = useGetLessons();
   const [currentPage, setCurrentPage] = useState(1);
   const lessonsPerPage = 5;
-  const startIndex = (currentPage - 1) * lessonsPerPage;
+
   const [currentLessons, setCurrentLessons] = useState([]);
-  const [totalPages, setTotalPage] = useState(0);
-  const handlePrevious = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
+  const [totalPages, setTotalPages] = useState(0);
+
   const [isOpen, setIsOpen] = useState(false);
   const createLessons = useCreateLesson();
+  const update = useUpdateLesson();
+  const deleteLessons = useDeleteLesson();
 
   const [isOpenUpdateModal, setOpenUpdateModal] = useState(false);
 
@@ -67,7 +69,7 @@ export default function ContentManagementScreen() {
 
   const UpdateFormik = useFormik({
     initialValues: {
-      id:null,
+      id: null,
       title: "",
       description: "",
     },
@@ -80,7 +82,9 @@ export default function ContentManagementScreen() {
         .min(10, "Description must be at least 10 characters"),
     }),
     onSubmit: async (values, { resetForm }) => {
-      const res = await createLessons.mutateAsync(values);
+      console.log(values);
+
+      const res = await update.mutateAsync(values);
       if (res.success) {
         Swal.fire({
           position: "top-end",
@@ -98,19 +102,57 @@ export default function ContentManagementScreen() {
           timer: 1500,
         });
       }
-
-      setIsOpen(false);
+      lessons.refetch();
+      setOpenUpdateModal(false);
       resetForm();
     },
   });
 
+  const handleDelete = async (id) => {
+    const res = await deleteLessons.mutateAsync(id);
+    if (res.success) {
+      Swal.fire({
+        position: "top-end",
+        icon: "success",
+        title: "Your lessons has been delete successfully",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } else {
+      Swal.fire({
+        position: "top-end",
+        icon: "error",
+        title: "something went wrong",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
+  };
+
   useEffect(() => {
-    if (!lessons.data) return;
-    const res = lessons.data.slice(startIndex, startIndex + lessonsPerPage);
-    setCurrentLessons(res);
-    const page = Math.ceil(lessons?.data.length / lessonsPerPage);
-    setCurrentPage(page);
-  }, [lessons.isLoading]);
+    if (lessons.data) {
+      const pages = Math.ceil(lessons.data.length / lessonsPerPage);
+      setTotalPages(pages);
+      const startIndex = (currentPage - 1) * lessonsPerPage;
+      const newLessons = lessons.data.slice(
+        startIndex,
+        startIndex + lessonsPerPage
+      );
+      setCurrentLessons(newLessons);
+    }
+  }, [lessons.data, currentPage]);
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   if (lessons.isLoading) return <Loading />;
 
@@ -119,12 +161,9 @@ export default function ContentManagementScreen() {
       <SectionWrapper>
         <div className="p-6 space-y-6">
           <div className="flex justify-end space-x-4">
-            {/* Add Lesson Section */}
             <button className="btn btn-primary" onClick={() => setIsOpen(true)}>
               Add Lesson
             </button>
-
-            {/* Add Vocabulary Section */}
             <button
               className="btn btn-success"
               onClick={() => navigation("/lessons/add-vocabulary")}
@@ -147,84 +186,78 @@ export default function ContentManagementScreen() {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentLessons.map((x, index) => {
-                    return (
-                      <tr
-                        className="text-gray-600 font-extralight text-xs"
-                        key={index}
-                      >
-                        <th>{x._id}</th>
-                        <td>{x.title}</td>
-                        <td>{x.description}</td>
-                        <td>{x.count}</td>
-                        <td className="flex justify-center items-center space-x-2">
-                          {/* Show Vocabulary */}
-                          <button
-                            className="btn btn-sm btn-success btn-outline"
-                            onClick={() => navigation("/lessons/vocabulary")}
-                          >
-                            Vocabulary
-                          </button>
-                          {/* Edit Button */}
-                          <button
-                            className="btn btn-sm btn-accent"
-                            onClick={() => {
-                              UpdateFormik.setFieldValue("title", x.title)
-                              UpdateFormik.setFieldValue("description", x.title)
-                              UpdateFormik.setFieldValue("id", x._id)
-                              setTimeout(() => {
-                                setOpenUpdateModal(true);
-                              }, 500);
-                            }}
-                          >
-                            Edit
-                          </button>
-
-                          {/* Delete Button */}
-                          <button
-                            className="btn btn-sm btn-warning"
-                            onClick={() => {}}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {currentLessons.map((x, index) => (
+                    <tr
+                      className="text-gray-600 font-extralight text-xs"
+                      key={index}
+                    >
+                      <th>{x._id}</th>
+                      <td>{x.title}</td>
+                      <td>{x.description}</td>
+                      <td>{x.count}</td>
+                      <td className="flex justify-center items-center space-x-2">
+                        <button
+                          className="btn btn-sm btn-success btn-outline"
+                          onClick={() => navigation("/lessons/vocabulary")}
+                        >
+                          Vocabulary
+                        </button>
+                        <button
+                          className="btn btn-sm btn-accent"
+                          onClick={() => {
+                            UpdateFormik.setFieldValue("title", x.title);
+                            UpdateFormik.setFieldValue(
+                              "description",
+                              x.description
+                            );
+                            UpdateFormik.setFieldValue("id", x._id);
+                            setTimeout(() => {
+                              setOpenUpdateModal(true);
+                            }, 500);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-sm btn-warning"
+                          onClick={() => handleDelete(x._id)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-            {currentLessons > lessonsPerPage && (
-              <>
-                {/* Pagination Controls */}
-                <div className="flex justify-center mt-6 space-x-4">
-                  <button
-                    onClick={handlePrevious}
-                    disabled={currentPage === 1}
-                    className={`btn ${
-                      currentPage === 1
-                        ? "btn-disabled"
-                        : "btn-primary btn-outline"
-                    }`}
-                  >
-                    Previous
-                  </button>
-                  <span className="text-gray-700">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <button
-                    onClick={handleNext}
-                    disabled={currentPage === totalPages}
-                    className={`btn ${
-                      currentPage === totalPages
-                        ? "btn-disabled"
-                        : "btn-primary btn-outline"
-                    }`}
-                  >
-                    Next
-                  </button>
-                </div>
-              </>
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-6 space-x-4">
+                <button
+                  onClick={handlePrevious}
+                  disabled={currentPage === 1}
+                  className={`btn ${
+                    currentPage === 1
+                      ? "btn-disabled"
+                      : "btn-primary btn-outline"
+                  }`}
+                >
+                  Previous
+                </button>
+                <span className="text-gray-700">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={handleNext}
+                  disabled={currentPage === totalPages}
+                  className={`btn ${
+                    currentPage === totalPages
+                      ? "btn-disabled"
+                      : "btn-primary btn-outline"
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
             )}
           </div>
         </div>
