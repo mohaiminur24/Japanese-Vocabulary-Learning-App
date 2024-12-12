@@ -1,8 +1,11 @@
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useGetLessons } from "../../react-query/lessons";
+import Loading from "../../components/common/loading";
 
 export default function AddVocabularyScreen() {
+  const lessons = useGetLessons();
   const formik = useFormik({
     initialValues: {
       word: "",
@@ -23,6 +26,8 @@ export default function AddVocabularyScreen() {
     },
   });
 
+  if (lessons.isLoading) return <Loading />;
+
   return (
     <div className="flex items-center justify-center min-h-screen py-20">
       <form
@@ -35,7 +40,10 @@ export default function AddVocabularyScreen() {
 
         {/* Word Field */}
         <div className="mb-4">
-          <label htmlFor="word" className="block text-gray-700 font-semibold mb-2">
+          <label
+            htmlFor="word"
+            className="block text-gray-700 font-semibold mb-2"
+          >
             Word
           </label>
           <input
@@ -58,7 +66,10 @@ export default function AddVocabularyScreen() {
 
         {/* Meaning Field */}
         <div className="mb-4">
-          <label htmlFor="meaning" className="block text-gray-700 font-semibold mb-2">
+          <label
+            htmlFor="meaning"
+            className="block text-gray-700 font-semibold mb-2"
+          >
             Meaning
           </label>
           <textarea
@@ -155,9 +166,9 @@ export default function AddVocabularyScreen() {
             }`}
           >
             <option value="" label="Select a lesson" />
-            <option value="1" label="Lesson 1" />
-            <option value="2" label="Lesson 2" />
-            <option value="3" label="Lesson 3" />
+            {lessons.data.map((x) => {
+              return <option value={x._id} label={x.title} />;
+            })}
           </select>
           {formik.touched.lessonNo && formik.errors.lessonNo && (
             <p className="text-red-500 text-sm mt-1">

@@ -3,6 +3,8 @@ import SectionWrapper from "../components/common/section-wrapper";
 import Modal from "../components/common/modal";
 import { logout, user_info } from "../components/common/custom-hook";
 import { useNavigate } from "react-router-dom";
+import { useGetLessons } from "../react-query/lessons";
+import Loading from "../components/common/loading";
 
 export default function VocabularyScreen() {
   const user = user_info();
@@ -10,25 +12,20 @@ export default function VocabularyScreen() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [currentIndex, setCurrentIndex] = useState(0);
-
   const handleNext = () => {
     if (currentIndex < data.length - 1) {
       setCurrentIndex(currentIndex + 1);
     }
   };
-
   const handlePrevious = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
     }
   };
-
   const currentWord = data[currentIndex];
-
   const totalPages = Math.ceil(data.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = data.slice(startIndex, startIndex + itemsPerPage);
-
   const [isOpenSlide, setOpenSlide] = useState(false);
 
   const handlePageChange = (page) => {
