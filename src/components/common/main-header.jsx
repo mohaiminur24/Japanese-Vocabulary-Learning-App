@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logout, user_info } from "./custom-hook";
 import { useEffect } from "react";
 
@@ -9,10 +9,10 @@ export default function MainHeader() {
   const userHeader = (
     <>
       <li>
-        <a href="/lessons">Lessons</a>
+        <Link to="/lessons">Lessons</Link>
       </li>
       <li>
-        <a href="/lessons/tutorial">Tutorials</a>
+        <Link to="/lessons/tutorial">Tutorials</Link>
       </li>
     </>
   );
@@ -20,16 +20,16 @@ export default function MainHeader() {
   const adminHeader = (
     <>
       <li>
-        <a href="/lessons/dashboard">Dashboard</a>
+        <Link to="/lessons/dashboard">Dashboard</Link>
       </li>
       <li>
-        <a href="/lessons/user-management">User Management</a>
+        <Link to="/lessons/user-management">User Management</Link>
       </li>
       <li>
-        <a href="/lessons/content-management">Content Management</a>
+        <Link to="/lessons/content-management">Content Management</Link>
       </li>
       <li>
-        <a href="/lessons/tutorial">Tutorial Management</a>
+        <Link to="/lessons/tutorial">Tutorial Management</Link>
       </li>
     </>
   );
@@ -73,15 +73,15 @@ export default function MainHeader() {
               {user.role == 1 ? adminHeader : userHeader}
             </ul>
           </div>
-          <a
+          <Link
             className="bg-white"
-            href={user.role == 2 ? "/lessons" : "/lessons/dashboard"}
+            to={user.role == 2 ? "/lessons" : "/lessons/dashboard"}
           >
             <img
               className="w-36 h-10"
               src="https://www.japanesevocabularyshortcut.com/wp-content/uploads/2020/04/cropped-jvs-rectangle.png"
             />
-          </a>
+          </Link>
         </div>
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal tracking-tighter px-2 text-black">
