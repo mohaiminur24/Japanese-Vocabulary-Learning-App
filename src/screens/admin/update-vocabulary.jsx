@@ -1,19 +1,30 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useRoutes,
+} from "react-router-dom";
+import {
+  useUpdateVocabulary,
+  useVocabulary,
+} from "../../react-query/vocabulary";
 import { useGetLessons } from "../../react-query/lessons";
 import Loading from "../../components/common/loading";
-import { useCreateVocabulary } from "../../react-query/vocabulary";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
 
-export default function AddVocabularyScreen() {
-  const lessons = useGetLessons();
-  const create = useCreateVocabulary();
+export default function UpdateVocabulary() {
   const navigation = useNavigate();
+  const { id } = useParams();
+  const vocabulary = useVocabulary(id);
+  const lessons = useGetLessons();
+  const update = useUpdateVocabulary();
 
   const formik = useFormik({
     initialValues: {
+      id: "",
       word: "",
       meaning: "",
       pronunciation: "",
@@ -28,29 +39,39 @@ export default function AddVocabularyScreen() {
       lessonNo: Yup.string().required("Lesson number is required"),
     }),
     onSubmit: async (values) => {
-      const res = await create.mutateAsync(values);
+      const res = await update.mutateAsync(values);
       if (res.success) {
         Swal.fire({
           position: "top-end",
           icon: "success",
-          title: "Vocabulary create successfully!",
+          title: "update successfully",
           showConfirmButton: false,
           timer: 1500,
         });
-        navigation("/lessons/content-management");
       } else {
         Swal.fire({
           position: "top-end",
           icon: "error",
-          title: "something went wrong try again!",
+          title: "something went wrong",
           showConfirmButton: false,
           timer: 1500,
         });
       }
+      navigation("/lessons/content-management");
     },
   });
 
-  if (lessons.isLoading) return <Loading />;
+  useEffect(() => {
+    if (!vocabulary.data) return;
+    formik.setFieldValue("id", vocabulary.data._id);
+    formik.setFieldValue("word", vocabulary.data.word);
+    formik.setFieldValue("meaning", vocabulary.data.meaning);
+    formik.setFieldValue("pronunciation", vocabulary.data.pronunciation);
+    formik.setFieldValue("whenToSay", vocabulary.data.whenToSay);
+    formik.setFieldValue("lessonNo", vocabulary.data.lessonNo);
+  }, [vocabulary.data]);
+
+  if (lessons.isLoading || vocabulary.isLoading) return <Loading />;
 
   return (
     <div className="flex items-center justify-center min-h-screen py-20">
@@ -206,7 +227,7 @@ export default function AddVocabularyScreen() {
           type="submit"
           className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
         >
-          Add Vocabulary
+          Update Vocabulary
         </button>
       </form>
     </div>

@@ -20,13 +20,13 @@ export default function MainHeader() {
   const adminHeader = (
     <>
       <li>
-        <a href="dashboard">Dashboard</a>
+        <a href="/lessons/dashboard">Dashboard</a>
       </li>
       <li>
-        <a href="user-management">User Management</a>
+        <a href="/lessons/user-management">User Management</a>
       </li>
       <li>
-        <a href="content-management">Content Management</a>
+        <a href="/lessons/content-management">Content Management</a>
       </li>
       <li>
         <a href="/lessons/tutorial">Tutorial Management</a>

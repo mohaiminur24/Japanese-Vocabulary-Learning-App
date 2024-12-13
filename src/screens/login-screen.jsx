@@ -117,8 +117,31 @@ const LoginScreen = () => {
           <button
             type="submit"
             className="w-full px-4 py-2 mt-6 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-200"
+            disabled={login_user.isLoading}
           >
-            Login
+            {login_user.isLoading ? (
+              <svg
+                className="w-5 h-5 mr-2 text-white animate-spin"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8z"
+                ></path>
+              </svg>
+            ) : null}
+            {login_user.isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
         {/* Redirect to Registration */}

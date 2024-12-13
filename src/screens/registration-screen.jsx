@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import { Navigate, NavLink, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
@@ -8,6 +8,33 @@ import Swal from "sweetalert2";
 const RegistrationScreen = () => {
   const create_user = useCreateNewUser();
   const navigation = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleUploadImage = async (file) => {
+    const data = new FormData();
+    data.append("image", file);
+
+    return fetch(
+      "https://api.imgbb.com/1/upload?key=7b421017dca71a4fb6a88c2556391529",
+      {
+        method: "POST",
+        body: data,
+      }
+    )
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.success) {
+          return result.data.url; // Return the image URL
+        } else {
+          throw new Error("Image upload failed");
+        }
+      })
+      .catch((error) => {
+        console.error("Error uploading image:", error);
+        throw error;
+      });
+  };
+
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -34,7 +61,10 @@ const RegistrationScreen = () => {
         .required("Password is required"),
     }),
     onSubmit: async (values) => {
-      values.photo = "";
+      setIsLoading(true);
+      const upload = await handleUploadImage(values.photo);
+      values.photo = upload;
+      setIsLoading(false);
       const res = await create_user.mutateAsync(values);
       if (res.success) {
         Swal.fire({
@@ -44,8 +74,8 @@ const RegistrationScreen = () => {
           showConfirmButton: false,
           timer: 1500,
         });
-       return navigation("/");
-      }else{
+        return navigation("/");
+      } else {
         Swal.fire({
           position: "top-end",
           icon: "error",
@@ -176,9 +206,9 @@ const RegistrationScreen = () => {
           <button
             type="submit"
             className="w-full px-4 py-2 mt-6 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-200 flex items-center justify-center"
-            disabled={create_user.isLoading}
+            disabled={create_user.isLoading || isLoading}
           >
-            {create_user.isLoading ? (
+            {create_user.isLoading || isLoading ? (
               <svg
                 className="w-5 h-5 mr-2 text-white animate-spin"
                 xmlns="http://www.w3.org/2000/svg"
@@ -200,7 +230,7 @@ const RegistrationScreen = () => {
                 ></path>
               </svg>
             ) : null}
-            {create_user.isLoading ? "Loading..." : "Register"}
+            {create_user.isLoading ||isLoading ? "Loading..." : "Register"}
           </button>
         </form>
 

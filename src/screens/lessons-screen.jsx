@@ -1,15 +1,18 @@
 import { useNavigate } from "react-router-dom";
 import SectionWrapper from "../components/common/section-wrapper";
-
+import { useGetLessons } from "../react-query/lessons";
+import Loading from "../components/common/loading";
 
 export default function LessonsScreen() {
   const navigation = useNavigate();
+  const lessons = useGetLessons();
+
   const handleRedirect = (id) => {
     navigation("vocabulary");
   };
 
-  
-  
+  if (lessons.isLoading) return <Loading />;
+
   return (
     <div>
       <SectionWrapper>
@@ -18,7 +21,7 @@ export default function LessonsScreen() {
             Japanese Vocabulary Lessons
           </h1>
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {lessons.map((lesson) => (
+            {lessons.data.map((lesson) => (
               <div
                 onClick={() => handleRedirect(lesson.id)}
                 key={lesson.id}
@@ -33,7 +36,7 @@ export default function LessonsScreen() {
                 <p className="text-gray-700 font-medium">
                   Vocabulary Count:{" "}
                   <span className="text-blue-500">
-                    {lesson.vocabularyCount}
+                    {lesson.count}
                   </span>
                 </p>
               </div>
@@ -44,37 +47,3 @@ export default function LessonsScreen() {
     </div>
   );
 }
-
-const lessons = [
-  {
-    id: 1,
-    title: "Basic Greetings",
-    description:
-      "Learn essential Japanese greetings for everyday conversations.",
-    vocabularyCount: 10,
-  },
-  {
-    id: 2,
-    title: "Numbers and Counting",
-    description: "Master the numbers and counting system in Japanese.",
-    vocabularyCount: 15,
-  },
-  {
-    id: 3,
-    title: "Family Members",
-    description: "Understand how to refer to family members in Japanese.",
-    vocabularyCount: 12,
-  },
-  {
-    id: 4,
-    title: "Food and Drinks",
-    description: "Learn Japanese vocabulary for common foods and drinks.",
-    vocabularyCount: 20,
-  },
-  {
-    id: 5,
-    title: "Shopping Phrases",
-    description: "Useful phrases and vocabulary for shopping in Japan.",
-    vocabularyCount: 18,
-  },
-];

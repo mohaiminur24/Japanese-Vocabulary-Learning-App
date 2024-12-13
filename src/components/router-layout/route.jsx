@@ -12,6 +12,8 @@ import ContentManagementScreen from "../../screens/admin/content-management-scre
 import UserManagementScreen from "../../screens/admin/user-management-screen";
 import TutorialScreen from "../../screens/tutorial-screen";
 import AddVocabularyScreen from "../../screens/admin/add-vocubulary-screen";
+import UpdateVocabulary from "../../screens/admin/update-vocabulary";
+import { useGetLessons } from "../../react-query/lessons";
 
 const route = createBrowserRouter([
   {
@@ -83,6 +85,14 @@ const route = createBrowserRouter([
         element: (
           <AdminPrivateRoute>
             <AddVocabularyScreen />
+          </AdminPrivateRoute>
+        ),
+      },
+      {
+        path: "UpdateVocabulary/:id",
+        element: (
+          <AdminPrivateRoute>
+            <UpdateVocabulary />
           </AdminPrivateRoute>
         ),
       },

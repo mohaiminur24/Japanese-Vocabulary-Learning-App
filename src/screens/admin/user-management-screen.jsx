@@ -1,3 +1,4 @@
+import Swal from "sweetalert2";
 import Loading from "../../components/common/loading";
 import SectionWrapper from "../../components/common/section-wrapper";
 import {
@@ -15,12 +16,44 @@ export default function UserManagementScreen() {
 
   const handleUpdateUser = async (id, role) => {
     const res = await update.mutateAsync({ id: id, role: role });
-    console.log(res);
-    
+    if (res.success) {
+      Swal.fire({
+        position: "top-end",
+        icon: "success",
+        title: "user update successfully!",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
   };
 
   const handleDelete = async (id) => {
-    await deleteUser.mutateAsync(id);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const res = await deleteUser.mutateAsync(id);
+        if (res.success) {
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your file has been deleted.",
+            icon: "success",
+          });
+        } else {
+          Swal.fire({
+            title: "error",
+            text: "something went wrong try again",
+            icon: "error",
+          });
+        }
+      }
+    });
   };
 
   return (
@@ -72,7 +105,7 @@ export default function UserManagementScreen() {
                       <div className="h-10 w-10 flex-shrink-0">
                         <img
                           className="h-10 w-10 rounded-full object-cover shadow-md"
-                          src={x.picture}
+                          src={x.photo}
                           alt={`${x.name}`}
                         />
                       </div>

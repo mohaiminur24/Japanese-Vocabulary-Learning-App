@@ -1,32 +1,43 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SectionWrapper from "../components/common/section-wrapper";
 import Modal from "../components/common/modal";
 import { logout, user_info } from "../components/common/custom-hook";
 import { useNavigate } from "react-router-dom";
-import { useGetLessons } from "../react-query/lessons";
+import {
+  useDeleteVocabulary,
+  useGetVocabulary,
+} from "../react-query/vocabulary";
 import Loading from "../components/common/loading";
+import Swal from "sweetalert2";
+import { useGetLessons } from "../react-query/lessons";
+import Confetti from "react-confetti";
 
 export default function VocabularyScreen() {
   const user = user_info();
+  const vocabulary = useGetVocabulary();
   const navigation = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const handleNext = () => {
-    if (currentIndex < data.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-  const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-  const currentWord = data[currentIndex];
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentItems = data.slice(startIndex, startIndex + itemsPerPage);
   const [isOpenSlide, setOpenSlide] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const lessonsPerPage = 5;
+  const [currentLessons, setCurrentLessons] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const deleteVocabulary = useDeleteVocabulary();
+  const lessons = useGetLessons();
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    if (vocabulary?.data) {
+      const pages = Math.ceil(vocabulary.data.length / lessonsPerPage);
+      setTotalPages(pages);
+      const startIndex = (currentPage - 1) * lessonsPerPage;
+      const newLessons = vocabulary.data.slice(
+        startIndex,
+        startIndex + lessonsPerPage
+      );
+      setCurrentLessons(newLessons);
+    }
+  }, [vocabulary.data, currentPage]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -38,30 +49,86 @@ export default function VocabularyScreen() {
     window.speechSynthesis.speak(utterance);
   };
 
+  const handleDeleteVocabulary = async (data) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const res = await deleteVocabulary.mutateAsync(data);
+        if (res.success) {
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your file has been deleted.",
+            icon: "success",
+          });
+        } else {
+          Swal.fire({
+            title: "sorry!",
+            text: "something went wrong",
+            icon: "error",
+          });
+        }
+      }
+    });
+  };
+
   if (!user) {
     logout();
     navigation("/");
   }
 
+  const handleFilter = (id) => {
+    const filter = vocabulary.data.filter((x) => x.lessonNo == id);
+    setCurrentLessons(filter);
+  };
+
+  const handleComplete = () => {
+    setIsComplete(true);
+    setTimeout(() => {
+      setIsComplete(false);
+    }, 6000);
+  };
+
+  if (vocabulary.isLoading || lessons.isLoading) return <Loading />;
+
   return (
     <div>
+      {isComplete && <Confetti />}
       <SectionWrapper>
         <div className="flex justify-end space-x-4">
-          {/*slide modal*/}
           <button
             className="btn btn-info btn-outline"
             onClick={() => setOpenSlide(true)}
           >
             Open Slider
           </button>
-          {/* Add Vocabulary Section */}
           {user.role === 1 && (
-            <button
-              className="btn btn-success btn-outline"
-              onClick={() => navigation("/lessons/add-vocabulary")}
-            >
-              Add Vocabulary
-            </button>
+            <>
+              <button
+                className="btn btn-success btn-outline"
+                onClick={() => navigation("/lessons/add-vocabulary")}
+              >
+                Add Vocabulary
+              </button>
+              <select
+                id="lessonSelect"
+                className="border border-gray-300 bg-transparent rounded px-4 py-2"
+                onChange={(event) => handleFilter(event.target.value)}
+              >
+                <option defaultChecked value="">
+                  filter by lesson name
+                </option>
+                {lessons.data.map((x) => {
+                  return <option value={x._id}>{x.title}</option>;
+                })}
+              </select>
+            </>
           )}
         </div>
         <div className="p-6">
@@ -72,43 +139,40 @@ export default function VocabularyScreen() {
                   <th>#</th>
                   <th>Word</th>
                   <th>Meaning</th>
-                  <th>pronunciation</th>
-                  <th>whenToSay</th>
-                  <th>lessonNo</th>
+                  <th>Pronunciation</th>
+                  <th>When To Say</th>
+                  <th>Lesson No</th>
                 </tr>
               </thead>
               <tbody>
-                {currentItems.map((x) => {
-                  return (
-                    <tr className="font-extralight text-gray-500" key={x.id}>
-                      <th>{x.id}</th>
-                      <td>{x.word}</td>
-                      <td>{x.meaning}</td>
-                      <td>{x.pronunciation}</td>
-                      <td className="text-xs">{x.whenToSay}</td>
-                      <td>{x.lessonNo}</td>
-                      {user.role === 1 && (
-                        <td className="flex justify-center items-center space-x-2">
-                          {/* Edit Button */}
-                          <button
-                            className="btn btn-sm btn-accent"
-                            onClick={() => {}}
-                          >
-                            Edit
-                          </button>
-
-                          {/* Delete Button */}
-                          <button
-                            className="btn btn-sm btn-warning"
-                            onClick={() => {}}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })}
+                {currentLessons.map((x, index) => (
+                  <tr className="font-extralight text-gray-500" key={x._id}>
+                    <th>{index + 1 + (currentPage - 1) * lessonsPerPage}</th>
+                    <td>{x.word}</td>
+                    <td>{x.meaning}</td>
+                    <td>{x.pronunciation}</td>
+                    <td className="text-xs">{x.whenToSay}</td>
+                    <td>{x.lessonNo}</td>
+                    {user.role === 1 && (
+                      <td className="flex justify-center items-center space-x-2">
+                        <button
+                          className="btn btn-sm btn-accent"
+                          onClick={() =>
+                            navigation(`/lessons/updateVocabulary/${x._id}`)
+                          }
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-sm btn-warning"
+                          onClick={() => handleDeleteVocabulary(x)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -131,42 +195,52 @@ export default function VocabularyScreen() {
           </div>
         </div>
       </SectionWrapper>
-      {/* modal is here */}
+      {/* Modal */}
       <Modal
         isOpen={isOpenSlide}
         title="Learning Japanese Vocabulary"
         onClose={() => setOpenSlide(false)}
       >
         <div>
-          <div className="p-6 flex flex-col items-center ">
+          <div className="p-6 flex flex-col items-center">
             <div className="rounded-lg w-full max-w-md p-6 border-b">
               <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">
-                {currentWord.word}
+                {currentLessons[currentIndex]?.word}
               </h2>
               <div className="text-gray-700 space-y-4">
                 <p>
                   <span className="font-semibold">Meaning:</span>{" "}
-                  {currentWord.meaning}
+                  {currentLessons[currentIndex]?.meaning}
                 </p>
                 <p>
                   <span className="font-semibold">Pronunciation:</span>{" "}
-                  {currentWord.pronunciation}
+                  {currentLessons[currentIndex]?.pronunciation}
                 </p>
                 <p>
                   <span className="font-semibold">When to Say:</span>{" "}
-                  {currentWord.whenToSay}
+                  {currentLessons[currentIndex]?.whenToSay}
                 </p>
                 <p>
                   <span className="font-semibold">Lesson Number:</span>{" "}
-                  {currentWord.lessonNo}
+                  {currentLessons[currentIndex]?.lessonNo}
                 </p>
               </div>
-              <button
-                onClick={() => handleSpeak(currentWord.word)}
-                className="btn btn-success btn-outline mt-20"
-              >
-                {currentWord.meaning}
-              </button>
+              <div>
+                <button
+                  onClick={() =>
+                    handleSpeak(currentLessons[currentIndex]?.word)
+                  }
+                  className="btn btn-success btn-outline mt-4"
+                >
+                  Speak
+                </button>
+                <button
+                  onClick={handleComplete}
+                  className="btn btn-accent btn-outline animate-pulse mt-4 ml-10"
+                >
+                  Complete
+                </button>
+              </div>
             </div>
 
             <div className="flex space-x-4 mt-6">
@@ -174,19 +248,23 @@ export default function VocabularyScreen() {
                 className={`btn ${
                   currentIndex === 0 ? "btn-disabled" : "btn-primary"
                 }`}
-                onClick={handlePrevious}
+                onClick={() => {
+                  setCurrentIndex(currentIndex - 1);
+                }}
                 disabled={currentIndex === 0}
               >
                 Previous
               </button>
               <button
                 className={`btn ${
-                  currentIndex === data.length - 1
+                  currentIndex === currentLessons.length - 1
                     ? "btn-disabled"
                     : "btn-primary"
                 }`}
-                onClick={handleNext}
-                disabled={currentIndex === data.length - 1}
+                onClick={() => {
+                  setCurrentIndex(currentIndex + 1);
+                }}
+                disabled={currentIndex === currentLessons.length - 1}
               >
                 Next
               </button>
@@ -197,167 +275,3 @@ export default function VocabularyScreen() {
     </div>
   );
 }
-
-const data = [
-  {
-    id: 1,
-    word: "こんにちは",
-    meaning: "Hello",
-    pronunciation: "Konnichiwa",
-    whenToSay:
-      "Used for greeting in the afternoon or general polite greetings.",
-    lessonNo: 1,
-  },
-  {
-    id: 2,
-    word: "さようなら",
-    meaning: "Goodbye",
-    pronunciation: "Sayounara",
-    whenToSay: "Used for saying goodbye, especially in formal contexts.",
-    lessonNo: 1,
-  },
-  {
-    id: 3,
-    word: "ありがとう",
-    meaning: "Thank you",
-    pronunciation: "Arigatou",
-    whenToSay: "Used to express gratitude or say 'thank you'.",
-    lessonNo: 2,
-  },
-  {
-    id: 4,
-    word: "いくら",
-    meaning: "How much?",
-    pronunciation: "Ikura",
-    whenToSay: "Used to ask for the price of something.",
-    lessonNo: 3,
-  },
-  {
-    id: 5,
-    word: "おはよう",
-    meaning: "Good morning",
-    pronunciation: "Ohayou",
-    whenToSay: "Used for greeting in the morning, informally.",
-    lessonNo: 1,
-  },
-  {
-    id: 6,
-    word: "おやすみ",
-    meaning: "Good night",
-    pronunciation: "Oyasumi",
-    whenToSay: "Used before going to bed or saying goodnight.",
-    lessonNo: 4,
-  },
-  {
-    id: 7,
-    word: "すみません",
-    meaning: "Excuse me / Sorry",
-    pronunciation: "Sumimasen",
-    whenToSay: "Used to apologize or get someone's attention politely.",
-    lessonNo: 2,
-  },
-  {
-    id: 8,
-    word: "はい",
-    meaning: "Yes",
-    pronunciation: "Hai",
-    whenToSay: "Used to agree or affirm.",
-    lessonNo: 1,
-  },
-  {
-    id: 9,
-    word: "いいえ",
-    meaning: "No",
-    pronunciation: "Iie",
-    whenToSay: "Used to disagree or decline.",
-    lessonNo: 1,
-  },
-  {
-    id: 10,
-    word: "お元気ですか",
-    meaning: "How are you?",
-    pronunciation: "Ogenki desu ka",
-    whenToSay: "Used to ask about someone's well-being.",
-    lessonNo: 3,
-  },
-  {
-    id: 11,
-    word: "お願いします",
-    meaning: "Please",
-    pronunciation: "Onegaishimasu",
-    whenToSay: "Used to politely request something.",
-    lessonNo: 2,
-  },
-  {
-    id: 12,
-    word: "どこ",
-    meaning: "Where?",
-    pronunciation: "Doko",
-    whenToSay: "Used to ask about a location.",
-    lessonNo: 3,
-  },
-  {
-    id: 13,
-    word: "誰",
-    meaning: "Who?",
-    pronunciation: "Dare",
-    whenToSay: "Used to ask about a person.",
-    lessonNo: 3,
-  },
-  {
-    id: 14,
-    word: "何",
-    meaning: "What?",
-    pronunciation: "Nani",
-    whenToSay: "Used to ask for information.",
-    lessonNo: 3,
-  },
-  {
-    id: 15,
-    word: "いつ",
-    meaning: "When?",
-    pronunciation: "Itsu",
-    whenToSay: "Used to ask about time.",
-    lessonNo: 3,
-  },
-  {
-    id: 16,
-    word: "どうぞ",
-    meaning: "Here you go / Please",
-    pronunciation: "Douzo",
-    whenToSay: "Used when offering something politely.",
-    lessonNo: 4,
-  },
-  {
-    id: 17,
-    word: "どうも",
-    meaning: "Thanks / Hello",
-    pronunciation: "Doumo",
-    whenToSay: "Used for casual thanks or greetings.",
-    lessonNo: 4,
-  },
-  {
-    id: 18,
-    word: "ちょっと待って",
-    meaning: "Wait a moment",
-    pronunciation: "Chotto matte",
-    whenToSay: "Used to ask someone to wait briefly.",
-    lessonNo: 5,
-  },
-  {
-    id: 19,
-    word: "いらっしゃいませ",
-    meaning: "Welcome",
-    pronunciation: "Irasshaimase",
-    whenToSay: "Used by staff to greet customers in shops or restaurants.",
-    lessonNo: 5,
-  },
-  {
-    id: 20,
-    word: "おめでとう",
-    meaning: "Congratulations",
-    pronunciation: "Omedetou",
-    whenToSay: "Used to congratulate someone.",
-    lessonNo: 6,
-  },
-];

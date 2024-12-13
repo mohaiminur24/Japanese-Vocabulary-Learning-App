@@ -18,7 +18,6 @@ export default function ContentManagementScreen() {
   const lessons = useGetLessons();
   const [currentPage, setCurrentPage] = useState(1);
   const lessonsPerPage = 5;
-
   const [currentLessons, setCurrentLessons] = useState([]);
   const [totalPages, setTotalPages] = useState(0);
 
@@ -109,24 +108,32 @@ export default function ContentManagementScreen() {
   });
 
   const handleDelete = async (id) => {
-    const res = await deleteLessons.mutateAsync(id);
-    if (res.success) {
-      Swal.fire({
-        position: "top-end",
-        icon: "success",
-        title: "Your lessons has been delete successfully",
-        showConfirmButton: false,
-        timer: 1500,
-      });
-    } else {
-      Swal.fire({
-        position: "top-end",
-        icon: "error",
-        title: "something went wrong",
-        showConfirmButton: false,
-        timer: 1500,
-      });
-    }
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const res = await deleteLessons.mutateAsync(id);
+        if (res.success) {
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your file has been deleted.",
+            icon: "success",
+          });
+        } else {
+          Swal.fire({
+            title: "sorry",
+            text: "something went wrong",
+            icon: "error",
+          });
+        }
+      }
+    });
   };
 
   useEffect(() => {
